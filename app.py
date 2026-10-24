@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import time
 import json
-
+import plotly.express as px
 # Page Configuration
 st.set_page_config(
     page_title="RAG Security Assessment Suite",
