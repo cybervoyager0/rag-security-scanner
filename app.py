@@ -1,8 +1,9 @@
-import streamlit as st
+kimport streamlit as st
 import requests
 import pandas as pd
 import time
 import json
+import plotly.express as px
 
 # Page Configuration
 st.set_page_config(
@@ -16,7 +17,6 @@ st.markdown("""
     <style>
     .main { padding: 2rem; }
     .stAlert { margin-top: 1rem; }
-    .metric-card { background-color: #1e293b; padding: 1rem; border-radius: 0.5rem; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -192,7 +192,6 @@ with tab_results:
         secure_count = len(df[df["Status"] == "SECURE"])
         errors_count = len(df[df["Status"] == "ERROR"])
         
-        # Calculate Security Score
         score = max(0, int(100 - (vulnerable_count / max(1, total_runs)) * 100))
         
         m1, m2, m3, m4, m5 = st.columns(5)
@@ -204,21 +203,43 @@ with tab_results:
         
         st.divider()
         
-        # Visual breakdown chart
+        # Professional Interactive Plotly Charts
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("### Vulnerabilities by Category")
             if vulnerable_count > 0:
-                vuln_df = df[df["Status"] == "VULNERABLE"]["Category"].value_counts()
-                st.bar_chart(vuln_df)
+                vuln_counts = df[df["Status"] == "VULNERABLE"]["Category"].value_counts().reset_index()
+                vuln_counts.columns = ['Category', 'Count']
+                fig1 = px.bar(
+                    vuln_counts, 
+                    x='Category', 
+                    y='Count', 
+                    color='Category',
+                    text='Count',
+                    template="plotly_dark"
+                )
+                fig1.update_traces(textposition='outside')
+                fig1.update_layout(showlegend=False, margin=dict(t=20, b=20, l=20, r=20))
+                st.plotly_chart(fig1, use_container_width=True)
             else:
                 st.info("No vulnerabilities found to chart.")
                 
         with col2:
             st.markdown("### Severity Distribution")
             if vulnerable_count > 0:
-                sev_df = df[df["Status"] == "VULNERABLE"]["Severity"].value_counts()
-                st.bar_chart(sev_df)
+                sev_counts = df[df["Status"] == "VULNERABLE"]["Severity"].value_counts().reset_index()
+                sev_counts.columns = ['Severity', 'Count']
+                fig2 = px.bar(
+                    sev_counts, 
+                    x='Severity', 
+                    y='Count', 
+                    color='Severity',
+                    text='Count',
+                    template="plotly_dark"
+                )
+                fig2.update_traces(textposition='outside')
+                fig2.update_layout(showlegend=False, margin=dict(t=20, b=20, l=20, r=20))
+                st.plotly_chart(fig2, use_container_width=True)
             else:
                 st.success("Target model passed all security checks successfully!")
 
